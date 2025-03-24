@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 
 	"github.com/allan-lewis/no-geeks-brewing-go/batch"
 	"github.com/allan-lewis/no-geeks-brewing-go/templates"
@@ -93,6 +94,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	for _, value := range batchesMap {
 		values = append(values, value)
 	}
+
+	sort.Slice(values, func(i, j int) bool {
+		return values[i].Number < values[j].Number
+	})
 
 	err := templates.Index(templates.Batches(values)).Render(r.Context(), w)
 

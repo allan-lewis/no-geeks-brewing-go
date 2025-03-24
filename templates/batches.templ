@@ -6,7 +6,8 @@ import (
 )
 
 templ card(batch batch.Batch) {
-    <div>
+    <div class="bg-gray-100">
+        <div>{ strconv.Itoa(batch.Number) }</div>
         <div>{ batch.Name }</div>
         <div>{ batch.Style }</div>
     </div>
