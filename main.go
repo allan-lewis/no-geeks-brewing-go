@@ -1,21 +1,18 @@
 package main
 
 import (
-	// "fmt"
 	"log"
 	"net/http"
-	"github.com/go-chi/chi/v5"
-	"github.com/fsnotify/fsnotify"
-	"github.com/gorilla/websocket"
+	"os"
+
 	"github.com/allan-lewis/no-geeks-brewing-go/batch"
 	"github.com/allan-lewis/no-geeks-brewing-go/templates"
+	"github.com/fsnotify/fsnotify"
+	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/websocket"
 )
 
-var batches = []batch.Batch{
-	{ID: "1", Name: "Pale Ale", Style: "IPA"},
-	{ID: "2", Name: "Stout", Style: "Imperial Stout"},
-	{ID: "3", Name: "Lager", Style: "Pilsner"},
-}
+var batchesMap = make(map[string]batch.Batch)
 
 var clients = make(map[*websocket.Conn]bool)
 var upgrader = websocket.Upgrader{
@@ -89,7 +86,15 @@ func notifyClients() {
 
 // Serve the index page with embedded JS for live reload
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	err := templates.Index(templates.Batches(batches)).Render(r.Context(), w)
+	// Create a slice to hold the values from the map
+	var values []batch.Batch
+
+	// Iterate over the map and append the values to the slice
+	for _, value := range batchesMap {
+		values = append(values, value)
+	}
+
+	err := templates.Index(templates.Batches(values)).Render(r.Context(), w)
 
 	if err != nil {
 		http.Error(w, "Error rendering template", http.StatusInternalServerError)
@@ -98,11 +103,21 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	authToken := os.Getenv("NO_GEEKS_BREWING_BREWFATHER_AUTH_TOKEN")
+
+	// Check if the environment variable is set
+	if authToken == "" {
+		// Exit the program if the environment variable is not found
+		log.Fatal("Environment variable NO_GEEKS_BREWING_BREWFATHER_AUTH_TOKEN is not set")
+	}
+
+	ch := make(chan batch.Batch)
+
 	r := chi.NewRouter()
 
 	// Define routes
-	r.Get("/", indexHandler)  // Serve the index page at "/"
-	// r.Get("/ws", wsHandler)   // WebSocket connection at "/ws"
+	r.Get("/", indexHandler) // Serve the index page at "/"
+	r.Get("/ws", wsHandler)  // WebSocket connection at "/ws"
 
 	http.HandleFunc("/ws", wsHandler)
 	go func() {
@@ -110,8 +125,21 @@ func main() {
 		log.Fatal(http.ListenAndServe(":9090", nil))
 	}()
 
+	go func() {
+		for {
+			// Receive the batch from the channel (this will block until something is received)
+			receivedBatch := <-ch
+			// Process the received batch (e.g., print it)
+			log.Printf("Received batch: %+v", receivedBatch)
+
+			batchesMap[receivedBatch.ID] = receivedBatch
+		}
+	}()
+
 	// Start file watcher
 	go watchFiles()
+
+	go batch.KickOff(ch, authToken)
 
 	// Start the HTTP server
 	log.Println("Starting server on :8080")
