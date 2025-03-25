@@ -9,6 +9,7 @@ import (
 	"github.com/allan-lewis/no-geeks-brewing-go/batches"
 	"github.com/allan-lewis/no-geeks-brewing-go/index"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 var batchesMap = make(map[string]batches.Batch)
@@ -26,6 +27,8 @@ func main() {
 	ch := make(chan batches.Batch)
 
 	r := chi.NewRouter()
+
+	r.Use(middleware.Logger)
 
 	// Define routes
 	r.Get("/", index.IndexHandler) // Serve the index page at "/"
