@@ -1,4 +1,4 @@
-package batch
+package batches
 
 type Batch struct {
 	ID       string    `json:"batchId"`

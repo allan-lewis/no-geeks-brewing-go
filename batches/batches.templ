@@ -1,11 +1,10 @@
-package templates
+package batches
 
 import (
     "strconv"
-	"github.com/allan-lewis/no-geeks-brewing-go/batch"
 )
 
-templ card(batch batch.Batch) {
+templ card(batch Batch) {
     <div class="bg-gray-100">
         <div>{ strconv.Itoa(batch.Number) }</div>
         <div>{ batch.Name }</div>
@@ -13,7 +12,7 @@ templ card(batch batch.Batch) {
     </div>
 }
 
-templ Batches(batches []batch.Batch) {
+templ Batches(batches []Batch) {
     <div class="flex w-full flex-col gap-4 rounded-md bg-gray-100 p-4">
         // <h2 class="text-2xl">Signed in as {session.user.name}</h2>
         <div class="flex flex-col rounded-md bg-neutral-100">
