@@ -1,16 +1,12 @@
-package index
+package layout
 
-templ header() {
+templ header(authComponent templ.Component) {
     <header class="sticky flex justify-center border-b">
       <div class="mx-auto flex h-16 w-full max-w-4xl items-center justify-between px-4 sm:px-6">
         <div>
             <h1 class="text-3xl font-bold">No Geeks Brewing</h1>
         </div>
-        <div id="login-div">
-          <button hx-get="/login" 
-                  hx-target="#login-div"
-                  hx-swap="innerHTML">Login with Authentik</button>
-        </div>
+        @authComponent
       </div>
     </header>
 }
@@ -29,7 +25,7 @@ templ footer() {
     </footer>
 }
 
-templ Index(contents templ.Component) {
+templ LayoutComponent(mainComponent templ.Component, authComponent templ.Component) {
 		<!DOCTYPE html>
 		<html lang="en">
 		<head>
@@ -41,9 +37,9 @@ templ Index(contents templ.Component) {
 		</head>
 		<body>
             <div class="flex h-full min-h-screen w-full flex-col justify-between">
-                @header()
+                @header(authComponent)
                 <main class="mx-auto w-full max-w-4xl flex-auto px-4 py-4 sm:px-6 md:py-6">
-                    @contents
+                    @mainComponent
                 </main>
                 @footer()
             </div>

@@ -1,0 +1,9 @@
+package oauth
+
+templ AuthComponent() {
+    <div id="login-div">
+        <button hx-get="/auth/login" 
+                hx-target="#login-div"
+                hx-swap="innerHTML">Login with Authentik</button>
+    </div>
+}

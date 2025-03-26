@@ -12,14 +12,30 @@ templ card(batch Batch) {
     </div>
 }
 
-templ Batches(batches []Batch) {
+var values []Batch
+
+templ BatchesComponent() {
+    	// Iterate over the map and append the values to the slice
+	// for _, value := range batchesMap {
+	// 	values = append(values, value)
+	// }
+
+	// sort.Slice(values, func(i, j int) bool {
+	// 	return values[i].Number < values[j].Number
+	// })
+	// session, _ := store.Get(r, "auth-session")
+	// userData, ok := session.Values["user"].(map[string]interface{})
+
+	// log.Printf("User data %v %v", userData, ok)
+
+
+
     <div class="flex w-full flex-col gap-4 rounded-md bg-gray-100 p-4">
-        // <h2 class="text-2xl">Signed in as {session.user.name}</h2>
         <div class="flex flex-col rounded-md bg-neutral-100">
             <div class="rounded-t-md bg-neutral-200 p-4">
-                <h3 class="text-xl mb-4">Brewfather Batches ({strconv.Itoa(len(batches))})</h3>
+                <h3 class="text-xl mb-4">Brewfather Batches ({strconv.Itoa(len(values))})</h3>
                 <div class="grid grid-cols-3 gap-4">
-                    for _, batch := range batches {
+                    for _, batch := range values {
                         @card(batch)
                     }
                 </div>
