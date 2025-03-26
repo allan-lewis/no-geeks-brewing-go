@@ -6,6 +6,11 @@ templ header() {
         <div>
             <h1 class="text-3xl font-bold">No Geeks Brewing</h1>
         </div>
+        <div id="login-div">
+          <button hx-get="/login" 
+                  hx-target="#login-div"
+                  hx-swap="innerHTML">Login with Authentik</button>
+        </div>
       </div>
     </header>
 }
@@ -31,6 +36,7 @@ templ Index(contents templ.Component) {
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <script src="https://cdn.tailwindcss.com"></script>
+            <script src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
 			<title>No Geeks Brewing</title>
 		</head>
 		<body>
