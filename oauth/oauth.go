@@ -109,3 +109,35 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	redirectURL := "http://localhost:8080/" // Your app's home page after logout
 	http.Redirect(w, r, fmt.Sprintf("%s?post_logout_redirect_uri=%s", idpLogoutURL, redirectURL), http.StatusFound)
 }
+
+type User struct {
+	Authenticated bool
+	Name          string
+	Email         string
+}
+
+func unauthenticated() User {
+	return User{
+		Authenticated: false,
+		Email:         "",
+		Name:          "",
+	}
+}
+
+func UserInfo(r *http.Request) User {
+	session, err := store.Get(r, "auth-session")
+	if err != nil {
+		return unauthenticated()
+	}
+
+	auth, ok := session.Values["authenticated"].(bool)
+	if ok && auth {
+		return User{
+			Authenticated: true,
+			Name:          "",
+			Email:         "",
+		}
+	} else {
+		return unauthenticated()
+	}
+}

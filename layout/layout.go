@@ -8,10 +8,13 @@ import (
 )
 
 func LayoutHandler(w http.ResponseWriter, r *http.Request) {
-	err := LayoutComponent(batches.BatchesComponent(), oauth.AuthComponent()).Render(r.Context(), w)
+	batchComponent := batches.BatchesComponent()
+	authComponent := oauth.AuthComponent(oauth.UserInfo(r))
+
+	err := LayoutComponent(batchComponent, authComponent).Render(r.Context(), w)
 
 	if err != nil {
-		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+		http.Error(w, "Error rendering base layout", http.StatusInternalServerError)
 		return
 	}
 
