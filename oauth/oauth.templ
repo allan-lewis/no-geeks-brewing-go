@@ -7,7 +7,7 @@ templ AuthComponent(user User) {
             // <a href="/auth/logout">Logged in as { user.Name }</a>
             <button hx-get="/auth/logout"
                     hx-target="#login-div"
-                    hx-swap="innerHTML">Logged in as { user.Name }</button>
+                    hx-swap="afterend">Logged in as { user.Name }</button>
         </div>
     } else {
         <div id="login-div">

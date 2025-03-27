@@ -113,7 +113,6 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Redirect to home
 	fmt.Fprintf(w, `
-	<p>Logging out...</p>
 	<script>window.location.href = "%s";</script>
 	`, "/")
 }
@@ -137,15 +136,11 @@ func UserInfo(r *http.Request) User {
 	if err != nil {
 		return unauthenticated()
 	}
-
-	log.Printf("User session %v", session)
-
+	
 	userData, ok := session.Values["user"].(map[string]interface{})
 	if (!ok) {
 		return unauthenticated()
 	}
-
-	log.Printf("User data %v", userData)
 
 	name, nameOk := userData["name"].(string)
 	if !nameOk {
