@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	// "net/url"
+	"net/url"
 
 	"github.com/allan-lewis/no-geeks-brewing-go/config"
+	"github.com/allan-lewis/no-geeks-brewing-go/user"
 	"github.com/coreos/go-oidc"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
 )
 
 var (
-	oauth2Config *oauth2.Config
-	provider     *oidc.Provider
-	logoutURI string
+	oauth2Config          *oauth2.Config
+	provider              *oidc.Provider
+	logoutURI             string
 	postLogoutRedirectURI string
 )
 
@@ -52,11 +53,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	state := "random-state" // Generate this securely in production
 	url := oauth2Config.AuthCodeURL(state)
 
-	// Return a simple HTML response indicating the redirect
-	fmt.Fprintf(w, `
-	<p>Redirecting to login...</p>
-	<script>window.location.href = "%s";</script>
-	`, url)
+	responseRedirect(w, url)
 }
 
 func AuthCallbackHandler(w http.ResponseWriter, r *http.Request) {
@@ -108,53 +105,40 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session.Options.MaxAge = -1 // Delete session
 	session.Save(r, w)
 
-	// Redirect to the IdP logout endpoint
-	// http.Redirect(w, r, fmt.Sprintf("%s?post_logout_redirect_uri=%s", logoutURI, url.QueryEscape(postLogoutRedirectURI)), http.StatusFound)
+	// TODO - Figure out a way to logout of Authentik, as well.
+	// This should work per OIDC conventions/standards, but doesn't seem supported
+	// out-of-the box for logout flows.
+	redirectUrl := fmt.Sprintf("%s?post_logout_redirect_uri=%s&client_id=%s", logoutURI, url.QueryEscape(postLogoutRedirectURI), oauth2Config.ClientID)
+	log.Printf("Redirect url %s", redirectUrl)
 
-	// Redirect to home
-	fmt.Fprintf(w, `
-	<script>window.location.href = "%s";</script>
-	`, "/")
+	responseRedirect(w, "/")
 }
 
-type User struct {
-	Authenticated bool
-	Name          string
-	Email         string
+func responseRedirect(w http.ResponseWriter, url string) {
+	w.Header().Set("HX-Redirect", url)
+	w.WriteHeader(http.StatusNoContent)
 }
 
-func unauthenticated() User {
-	return User{
-		Authenticated: false,
-		Email:         "",
-		Name:          "",
-	}
-}
-
-func UserInfo(r *http.Request) User {
+func User(r *http.Request) user.User {
 	session, err := store.Get(r, "auth-session")
 	if err != nil {
-		return unauthenticated()
+		return user.UnauthenticatedUser()
 	}
-	
-	userData, ok := session.Values["user"].(map[string]interface{})
-	if (!ok) {
-		return unauthenticated()
+
+	userData, ok := session.Values["user"].(map[string]any)
+	if !ok {
+		return user.UnauthenticatedUser()
 	}
 
 	name, nameOk := userData["name"].(string)
 	if !nameOk {
-		return unauthenticated()
+		return user.UnauthenticatedUser()
 	}
 
 	email, emailOk := userData["email"].(string)
 	if !emailOk {
-		return unauthenticated()
+		return user.UnauthenticatedUser()
 	}
 
-	return User{
-		Authenticated: true,
-		Name:          name,
-		Email:         email,
-	}
+	return user.AuthenticatedUser(name, email)
 }

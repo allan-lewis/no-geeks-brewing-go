@@ -8,7 +8,7 @@ import (
 )
 
 func LayoutHandler(w http.ResponseWriter, r *http.Request) {
-	user := oauth.UserInfo(r)
+	user := oauth.User(r)
 	batchComponent := batches.BatchesComponent(user)
 	authComponent := oauth.AuthComponent(user)
 

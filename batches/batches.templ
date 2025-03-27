@@ -2,7 +2,7 @@ package batches
 
 import (
     "strconv"
-	"github.com/allan-lewis/no-geeks-brewing-go/oauth"
+	"github.com/allan-lewis/no-geeks-brewing-go/user"
 )
 
 templ card(batch Batch) {
@@ -15,7 +15,7 @@ templ card(batch Batch) {
 
 var values []Batch
 
-templ BatchesComponent(user oauth.User) {
+templ BatchesComponent(user user.User) {
 
 
     	// Iterate over the map and append the values to the slice
@@ -32,7 +32,7 @@ templ BatchesComponent(user oauth.User) {
 	// log.Printf("User data %v %v", userData, ok)
 
 
-    if user.Authenticated {
+    if user.Authenticated() {
         <div class="flex w-full flex-col gap-4 rounded-md bg-gray-100 p-4">
             <div class="flex flex-col rounded-md bg-neutral-100">
                 <div class="rounded-t-md bg-neutral-200 p-4">

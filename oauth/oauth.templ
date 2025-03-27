@@ -1,19 +1,17 @@
 package oauth
 
-templ AuthComponent(user User) {
-    if user.Authenticated {
+import (
+	"github.com/allan-lewis/no-geeks-brewing-go/user"
+)
 
-        <div id="login-div">
-            // <a href="/auth/logout">Logged in as { user.Name }</a>
-            <button hx-get="/auth/logout"
-                    hx-target="#login-div"
-                    hx-swap="afterend">Logged in as { user.Name }</button>
+templ AuthComponent(user user.User) {
+    if user.Authenticated() {
+        <div>
+            <button hx-get="/auth/logout">Logged in as { user.Name() }</button>
         </div>
     } else {
-        <div id="login-div">
-            <button hx-get="/auth/login" 
-                    hx-target="#login-div"
-                    hx-swap="innerHTML">Login with Authentik</button>
+        <div>
+            <button hx-get="/auth/login">Login with Authentik</button>
         </div>
     }
 }
