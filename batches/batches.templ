@@ -2,6 +2,7 @@ package batches
 
 import (
     "strconv"
+	"github.com/allan-lewis/no-geeks-brewing-go/oauth"
 )
 
 templ card(batch Batch) {
@@ -14,7 +15,9 @@ templ card(batch Batch) {
 
 var values []Batch
 
-templ BatchesComponent() {
+templ BatchesComponent(user oauth.User) {
+
+
     	// Iterate over the map and append the values to the slice
 	// for _, value := range batchesMap {
 	// 	values = append(values, value)
@@ -29,17 +32,22 @@ templ BatchesComponent() {
 	// log.Printf("User data %v %v", userData, ok)
 
 
-
-    <div class="flex w-full flex-col gap-4 rounded-md bg-gray-100 p-4">
-        <div class="flex flex-col rounded-md bg-neutral-100">
-            <div class="rounded-t-md bg-neutral-200 p-4">
-                <h3 class="text-xl mb-4">Brewfather Batches ({strconv.Itoa(len(values))})</h3>
-                <div class="grid grid-cols-3 gap-4">
-                    for _, batch := range values {
-                        @card(batch)
-                    }
+    if user.Authenticated {
+        <div class="flex w-full flex-col gap-4 rounded-md bg-gray-100 p-4">
+            <div class="flex flex-col rounded-md bg-neutral-100">
+                <div class="rounded-t-md bg-neutral-200 p-4">
+                    <h3 class="text-xl mb-4">Brewfather Batches ({strconv.Itoa(len(values))})</h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        for _, batch := range values {
+                            @card(batch)
+                        }
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    } else {
+        <p className="w-full rounded-md bg-gray-100 text-center py-16">
+            Please <em>login</em> to view Brewfather batch data.
+        </p>
+    }
 }

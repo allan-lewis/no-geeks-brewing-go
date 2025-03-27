@@ -11,10 +11,12 @@ type BrewfatherConfig struct {
 }
 
 type AuthConfig struct {
-	Issuer       string
-	ClientID     string
-	ClientSecret string
-	RedirectURI  string
+	Issuer       			string
+	ClientID     			string
+	ClientSecret 			string
+	RedirectURI  			string
+	LogoutURI 				string
+	PostLogoutRedirectURI 	string
 }
 
 var (
@@ -67,11 +69,27 @@ func Init() {
 		log.Fatal("Environment variable NO_GEEKS_BREWING_REDIRECT_URI is not set")
 	}
 
+	// Authentik redirect URL
+	logoutURI := os.Getenv("NO_GEEKS_BREWING_AUTHENTIK_LOGOUT_URI")
+	if logoutURI == "" {
+		// Exit the program if the environment variable is not found
+		log.Fatal("Environment variable NO_GEEKS_BREWING_AUTHENTIK_LOGOUT_URI is not set")
+	}
+
+	// Authentik redirect URL
+	postLogoutRedirectURI := os.Getenv("NO_GEEKS_BREWING_POST_LOGOUT_REDIRECT_URI")
+	if postLogoutRedirectURI == "" {
+		// Exit the program if the environment variable is not found
+		log.Fatal("Environment variable NO_GEEKS_BREWING_POST_LOGOUT_REDIRECT_URI is not set")
+	}
+
 	Authentik = AuthConfig{
 		Issuer:       issuer,
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		RedirectURI:  redirectURI,
+		LogoutURI: logoutURI,
+		PostLogoutRedirectURI: postLogoutRedirectURI,
 	}
 
 	log.Println("Successfully loaded Authentik config")

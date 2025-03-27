@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	// "net/url"
 
 	"github.com/allan-lewis/no-geeks-brewing-go/config"
 	"github.com/coreos/go-oidc"
@@ -15,6 +16,8 @@ import (
 var (
 	oauth2Config *oauth2.Config
 	provider     *oidc.Provider
+	logoutURI string
+	postLogoutRedirectURI string
 )
 
 var store = sessions.NewCookieStore([]byte("your-secret-key"))
@@ -40,6 +43,9 @@ func Init(authentikConfig config.AuthConfig) {
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 		Endpoint:     provider.Endpoint(),
 	}
+
+	logoutURI = authentikConfig.LogoutURI
+	postLogoutRedirectURI = authentikConfig.PostLogoutRedirectURI
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -90,24 +96,26 @@ func AuthCallbackHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userData, ok := session.Values["user"].(map[string]interface{})
-	log.Printf("User data >> %v %v", userData, ok)
-
 	// Redirect to home
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Logging out")
 	// Clear the local session
 	session, _ := store.Get(r, "auth-session")
-	session.Values["authenticated"] = false
+	session.Values = nil
 	session.Options.MaxAge = -1 // Delete session
 	session.Save(r, w)
 
 	// Redirect to the IdP logout endpoint
-	idpLogoutURL := "https://auth.example.com/application/o/provider-slug/end-session/"
-	redirectURL := "http://localhost:8080/" // Your app's home page after logout
-	http.Redirect(w, r, fmt.Sprintf("%s?post_logout_redirect_uri=%s", idpLogoutURL, redirectURL), http.StatusFound)
+	// http.Redirect(w, r, fmt.Sprintf("%s?post_logout_redirect_uri=%s", logoutURI, url.QueryEscape(postLogoutRedirectURI)), http.StatusFound)
+
+	// Redirect to home
+	fmt.Fprintf(w, `
+	<p>Logging out...</p>
+	<script>window.location.href = "%s";</script>
+	`, "/")
 }
 
 type User struct {
@@ -130,14 +138,28 @@ func UserInfo(r *http.Request) User {
 		return unauthenticated()
 	}
 
-	auth, ok := session.Values["authenticated"].(bool)
-	if ok && auth {
-		return User{
-			Authenticated: true,
-			Name:          "",
-			Email:         "",
-		}
-	} else {
+	log.Printf("User session %v", session)
+
+	userData, ok := session.Values["user"].(map[string]interface{})
+	if (!ok) {
 		return unauthenticated()
+	}
+
+	log.Printf("User data %v", userData)
+
+	name, nameOk := userData["name"].(string)
+	if !nameOk {
+		return unauthenticated()
+	}
+
+	email, emailOk := userData["email"].(string)
+	if !emailOk {
+		return unauthenticated()
+	}
+
+	return User{
+		Authenticated: true,
+		Name:          name,
+		Email:         email,
 	}
 }

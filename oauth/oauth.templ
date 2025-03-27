@@ -2,7 +2,13 @@ package oauth
 
 templ AuthComponent(user User) {
     if user.Authenticated {
-        <div>Logged in as { user.Name }</div>
+
+        <div id="login-div">
+            // <a href="/auth/logout">Logged in as { user.Name }</a>
+            <button hx-get="/auth/logout"
+                    hx-target="#login-div"
+                    hx-swap="innerHTML">Logged in as { user.Name }</button>
+        </div>
     } else {
         <div id="login-div">
             <button hx-get="/auth/login" 
