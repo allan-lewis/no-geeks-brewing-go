@@ -6,12 +6,19 @@ import (
 
 templ AuthComponent(user user.User) {
     if user.Authenticated() {
-        <div>
-            <button hx-get="/auth/logout">Logged in as { user.Name() }</button>
+        <div x-data={ "{isDisabled: false, buttonText: 'Logged in as " + user.Name() + "'}" } >
+            <button hx-get="/auth/logout"
+                    x-text="buttonText"
+                    x-bind:disabled="isDisabled"
+                    @click="isDisabled = true; buttonText = 'Logging out...'">
+            </button>
         </div>
     } else {
-        <div>
-            <button hx-get="/auth/login">Login with Authentik</button>
+        <div x-data="{ isDisabled: false, buttonText: 'Login with Authentik' }">
+            <button hx-get="/auth/login"
+                    x-text="buttonText" 
+                    x-bind:disabled="isDisabled" 
+                    @click="isDisabled = true; buttonText = 'Logging in...'"></button>
         </div>
     }
 }
